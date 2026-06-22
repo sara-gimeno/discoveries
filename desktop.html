@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mar d'Estiu 2026 — Custom Pack</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1a1f5e;--coral:#e85c45;--coral-h:#d04535;
+  --green:#22a06b;--green-light:#e6f7f1;--blue:#1a56db;
+  --bg:#f5f5f5;--white:#fff;--border:#e0ddd8;--text:#1a1a1a;
+  --muted:#6b7280;--muted-l:#9ca3af;--tag:#eef0f8;
+}
+html,body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* TOPBAR */
+.topbar{background:var(--navy);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;flex-shrink:0;}
+.logo{color:#fff;font-size:17px;font-weight:800;letter-spacing:-.5px;}
+.logo span{color:var(--coral);}
+.logo-sub{color:rgba(255,255,255,.45);font-size:10px;font-weight:400;display:block;line-height:1;}
+.tb-right{display:flex;gap:8px;align-items:center;}
+.tb-btn{background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.85);padding:5px 10px;border-radius:5px;font-size:12px;cursor:pointer;}
+.tb-icon{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;font-size:18px;}
+.tb-div{width:1px;height:20px;background:rgba(255,255,255,.2);}
+
+/* HERO */
+.hero{height:240px;background:linear-gradient(160deg,#3a5bd9 0%,#1a1f5e 100%);display:flex;align-items:flex-end;padding:20px 24px;position:relative;overflow:hidden;flex-shrink:0;}
+.hero-waves{position:absolute;inset:0;opacity:.07;background-image:repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(255,255,255,.5) 30px,rgba(255,255,255,.5) 31px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.3) 60px,rgba(255,255,255,.3) 61px);}
+.hero-title{position:relative;color:#fff;}
+.hero-title h1{font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;font-style:italic;}
+.hero-title .year{font-size:20px;font-weight:400;opacity:.7;margin-bottom:2px;display:block;}
+.hero-title .loc{font-size:13px;opacity:.6;margin-top:4px;display:block;}
+.hero-photos{position:absolute;right:20px;bottom:16px;}
+.hero-photos button{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;}
+
+/* PACK BUILDER */
+.pack-wrap{max-width:780px;margin:0 auto;padding:24px;width:100%;}
+.pack-h2{font-size:22px;font-weight:700;}
+.pack-sub{color:var(--muted);font-size:14px;margin-top:2px;}
+.pack-loc{color:var(--muted);font-size:12px;margin-top:6px;}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.sec-title{font-size:15px;font-weight:600;margin-bottom:10px;}
+.info-txt{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
+.incl-list{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.incl-list li{font-size:13px;display:flex;align-items:center;gap:6px;}
+.incl-list li::before{content:'✓';color:var(--green);font-weight:700;font-size:12px;}
+
+/* DISCOUNT TIERS */
+.disc-label{font-size:13px;font-weight:600;margin:14px 0 10px;}
+.tiers{display:flex;gap:10px;}
+.tier{flex:1;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;transition:border-color .3s,background .3s,opacity .3s;}
+.tier.dim{opacity:.4;}
+.tier.active-tier{border-color:var(--green);background:var(--green-light);}
+.tier-lbl{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.tier-pct{font-size:18px;font-weight:800;color:var(--green);}
+.tier-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;}
+
+/* BUNDLE */
+.bundle-box{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.bitem{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--white);}
+.bitem+.bitem{border-top:1px solid var(--border);}
+.bimg{width:56px;height:44px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.bname{font-weight:600;font-size:14px;}
+.bmeta{font-size:12px;color:var(--muted);margin-top:1px;}
+
+/* SESSIONS */
+.sess-list{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.srow{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--white);transition:background .15s;}
+.srow+.srow{border-top:1px solid var(--border);}
+.srow.sel{background:#fffaf9;}
+.sdate{width:46px;text-align:center;flex-shrink:0;border:1px solid var(--border);border-radius:6px;padding:5px 4px;}
+.sdate .dow{font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;}
+.sdate .day{font-size:20px;font-weight:800;line-height:1;}
+.sdate .mon{font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;}
+.simg{width:52px;height:40px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.sinfo{flex:1;}
+.smeta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-bottom:2px;}
+.sartist{font-size:14px;font-weight:700;}
+.add-btn{background:var(--coral);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;}
+.add-btn:hover{background:var(--coral-h);}
+.rem-btn{background:none;color:var(--text);border:1.5px solid var(--border);padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+
+/* BOTTOM BAR */
+.bot-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;z-index:100;flex-shrink:0;}
+.bot-l{display:flex;flex-direction:column;gap:2px;}
+.bot-lbl{font-size:12px;color:var(--muted);}
+.bot-cnt{font-size:15px;font-weight:700;}
+.bot-prog{width:160px;height:5px;background:var(--border);border-radius:3px;margin-top:4px;overflow:hidden;}
+.bot-fill{height:100%;background:var(--green);border-radius:3px;transition:width .3s;}
+.bot-r{display:flex;align-items:center;gap:12px;}
+.unlock-tag{font-size:13px;color:var(--green);font-weight:600;}
+.buy-btn{background:var(--coral);color:#fff;border:none;padding:9px 22px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s,opacity .15s;}
+.buy-btn:disabled{opacity:.4;cursor:not-allowed;background:var(--muted-l);}
+.buy-btn:not(:disabled):hover{background:var(--coral-h);}
+
+/* SEAT SCREEN */
+#screen-seats{background:#f0f0f0;}
+.seat-nav{background:var(--navy);position:sticky;top:0;z-index:200;flex-shrink:0;}
+.seat-hdr{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
+.shdr-img{width:56px;height:44px;border-radius:6px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.shdr-info{flex:1;}
+.shdr-title{color:#fff;font-size:15px;font-weight:700;}
+.shdr-sub{color:rgba(255,255,255,.6);font-size:12px;margin-top:1px;}
+.shdr-meta{display:flex;flex-direction:column;gap:2px;align-items:flex-end;}
+.shdr-date{color:rgba(255,255,255,.8);font-size:12px;}
+.shdr-venue{color:rgba(255,255,255,.5);font-size:11px;}
+.more-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;margin-left:10px;white-space:nowrap;}
+
+/* BREADCRUMB full-width */
+.seat-bc{display:flex;width:100%;}
+.bc-step{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);position:relative;overflow:hidden;}
+.bc-step::after{content:'';position:absolute;right:0;top:0;bottom:0;width:0;border-top:19px solid transparent;border-bottom:19px solid transparent;border-left:10px solid var(--navy);z-index:2;}
+.bc-step.bc-active{background:var(--coral);color:#fff;}
+.bc-step.bc-active::after{border-left-color:var(--coral);}
+.bc-step.bc-done{color:rgba(255,255,255,.75);}
+.bc-step:last-child::after{display:none;}
+.bc-num{width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.bc-step.bc-done .bc-num{background:var(--green);border-color:var(--green);color:#fff;}
+.bc-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;}
+
+/* SEAT BODY */
+.seat-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* LEFT PANEL */
+.sleft{width:200px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sleft-hdr{padding:11px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sleft-title{font-size:13px;font-weight:600;}
+.close-x{background:none;border:1px solid var(--border);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--muted);}
+.zone-list-panel{padding:8px;display:flex;flex-direction:column;gap:5px;}
+.zitem{border:1.5px solid var(--border);border-radius:7px;padding:8px 10px;cursor:pointer;transition:border-color .15s;}
+.zitem:hover{border-color:var(--navy);}
+.zitem.zactive{border-color:var(--navy);background:var(--tag);}
+.zname{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.zdot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.zprice{font-size:13px;font-weight:700;margin-top:2px;}
+
+/* MAP AREA */
+.smap{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:12px;}
+
+/* CART */
+.scart{width:290px;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.cart-body{flex:1;overflow-y:auto;padding:12px;min-height:0;}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;padding:24px 14px;text-align:center;}
+.ce-icon{font-size:36px;opacity:.25;margin-bottom:10px;line-height:1;}
+.ce-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.ce-sub{font-size:12px;color:var(--muted);line-height:1.4;}
+.cart-timer{font-size:12px;color:var(--coral);display:flex;align-items:center;gap:5px;margin-bottom:10px;font-weight:500;}
+.citem{border:1.5px solid var(--border);border-radius:7px;padding:9px;margin-bottom:7px;position:relative;}
+.citem-zone{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:2px;padding-left:7px;}
+.citem-seat{font-size:11px;color:var(--muted);}
+.citem-price{font-size:13px;font-weight:700;text-align:right;margin-top:3px;}
+.citem-acts{position:absolute;top:7px;right:7px;display:flex;gap:3px;}
+.ca{background:none;border:1px solid var(--border);border-radius:4px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);}
+.cart-fees{font-size:12px;color:var(--muted);padding:5px 0;display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:2px;}
+.cart-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;background:#fafafa;border-radius:5px;padding:6px;}
+.cart-foot{padding:11px 13px;border-top:1px solid var(--border);background:#fff;flex-shrink:0;}
+.cart-tot-row{display:flex;align-items:center;justify-content:space-between;}
+.packs-lbl{font-size:12px;color:var(--muted);}
+.tot-price{font-size:18px;font-weight:800;}
+.cont-btn{width:100%;margin-top:9px;background:var(--blue);color:#fff;border:none;padding:10px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.cont-btn:hover:not(:disabled){opacity:.9;}
+.cont-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* ZOOM CONTROLS */
+.zoom-ctrls{position:absolute;bottom:12px;right:12px;display:flex;flex-direction:column;gap:4px;}
+.zbtn{width:30px;height:30px;background:#fff;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+/* CHECKOUT */
+#screen-checkout{background:var(--bg);}
+.co-wrap{max-width:860px;margin:0 auto;padding:28px 24px;display:flex;gap:24px;align-items:flex-start;}
+.co-main{flex:1;display:flex;flex-direction:column;gap:18px;}
+.co-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;}
+.co-card h3{font-size:15px;font-weight:700;margin-bottom:14px;}
+.frow{display:flex;gap:12px;margin-bottom:12px;}
+.fg{flex:1;display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.finput{border:1.5px solid var(--border);border-radius:6px;padding:9px 11px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.finput:focus{border-color:var(--navy);}
+.pay-icons{display:flex;gap:8px;margin-bottom:14px;}
+.pico{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:4px 9px;font-size:11px;font-weight:600;color:var(--muted);}
+.co-sidebar{width:280px;flex-shrink:0;}
+.sum-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;position:sticky;top:76px;}
+.sum-card h3{font-size:14px;font-weight:700;margin-bottom:12px;}
+.sline{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;color:var(--muted);}
+.sline .sp{font-weight:600;color:var(--text);}
+.sdiv{border:none;border-top:1px solid var(--border);margin:8px 0;}
+.sdisc{color:var(--green);font-weight:600;font-size:13px;display:flex;justify-content:space-between;margin-bottom:7px;}
+.stot{display:flex;justify-content:space-between;font-size:16px;font-weight:800;margin-top:5px;}
+.ssess{border:1px solid var(--border);border-radius:7px;padding:9px;margin-bottom:7px;}
+.ssess-name{font-size:13px;font-weight:600;}
+.ssess-seat{font-size:11px;color:var(--muted);margin-top:1px;}
+.ssess-price{font-size:12px;font-weight:600;text-align:right;margin-top:3px;}
+.co-submit{width:100%;background:var(--coral);color:#fff;border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;transition:background .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(232,92,69,.35);letter-spacing:.2px;}
+.co-submit:hover{background:var(--coral-h);box-shadow:0 6px 16px rgba(232,92,69,.45);}
+
+/* THANK YOU */
+#screen-thankyou{background:var(--bg);}
+.ty-wrap{max-width:580px;margin:0 auto;padding:48px 24px;text-align:center;}
+.ty-check{width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:32px;color:#fff;}
+.ty-h1{font-size:28px;font-weight:800;margin-bottom:7px;}
+.ty-sub{font-size:15px;color:var(--muted);margin-bottom:28px;line-height:1.5;}
+.ty-disc{background:var(--green-light);color:var(--green);border:1px solid rgba(34,160,107,.2);border-radius:6px;padding:10px 14px;margin-bottom:22px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.ty-box{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;text-align:left;margin-bottom:22px;}
+.ty-box h3{font-size:14px;font-weight:700;margin-bottom:12px;}
+.ty-sess{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.ty-sess:last-child{border-bottom:none;}
+.ty-si{font-size:20px;width:30px;text-align:center;flex-shrink:0;}
+.ty-sinfo .ty-sa{font-size:13px;font-weight:600;}
+.ty-sinfo .ty-sd{font-size:11px;color:var(--muted);margin-top:1px;}
+.ty-seat{font-size:11px;color:var(--muted);margin-left:auto;text-align:right;flex-shrink:0;}
+.ty-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.ty-p{background:var(--coral);color:#fff;border:none;padding:11px 22px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;}
+.ty-s{background:#fff;color:var(--text);border:1.5px solid var(--border);padding:11px 22px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- ====== SCREEN 1: PACK BUILDER ====== -->
+<div class="screen active" id="screen-builder">
+  <nav class="topbar">
+    <div><div class="logo">ONEBO<span>X</span></div><span class="logo-sub">Ticket Distribution System</span></div>
+    <div class="tb-right">
+      <button class="tb-btn">🎁 Gift card</button>
+      <button class="tb-btn">❓ Help</button>
+      <div class="tb-div"></div>
+      <button class="tb-icon">👤</button>
+      <button class="tb-icon">🛒</button>
+    </div>
+  </nav>
+  <div class="hero">
+    <div class="hero-waves"></div>
+    <div class="hero-title">
+      <span class="year">2026</span>
+      <h1>mar d'estiu</h1>
+      <span class="loc">📍 Santa Susanna</span>
+    </div>
+    <div class="hero-photos"><button>🖼 View photos</button></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;">
+    <div class="pack-wrap">
+      <div style="margin-bottom:8px;">
+        <div class="pack-h2">Mar d'estiu custom pack</div>
+        <div class="pack-sub">Create your custom festival pack</div>
+        <div class="pack-loc">📍 Auditori Mar d'Estiu, Santa Susanna</div>
+      </div>
+      <hr class="divider">
+      <div class="sec-title">Information</div>
+      <p class="info-txt">Build your own summer music experience with one essential concert included, two exclusive items, and the freedom to add the shows that fit your perfect festival plan.</p>
+      <div class="sec-title" style="margin-bottom:8px;">What's Included</div>
+      <ul class="incl-list">
+        <li>Guaranteed access to <strong>Sopa de Cabra</strong></li>
+        <li>1 gastro menu access included by default</li>
+        <li>Choice of <strong>2 to 5 additional festival sessions</strong></li>
+        <li>Progressive discount based on the number of added concerts</li>
+        <li>A single customizable pack for your selected summer nights</li>
+      </ul>
+      <div class="disc-label">How does the discount work?</div>
+      <div class="tiers">
+        <div class="tier dim" id="tier-2"><div class="tier-lbl" id="lbl-2">starting from</div><div class="tier-pct">15% off</div><div class="tier-desc">selecting 2 extra concerts</div></div>
+        <div class="tier dim" id="tier-3"><div class="tier-lbl" id="lbl-3">unlock</div><div class="tier-pct">22% off</div><div class="tier-desc">adding 3 extra concerts</div></div>
+        <div class="tier dim" id="tier-4"><div class="tier-lbl" id="lbl-4">unlock</div><div class="tier-pct">28% off</div><div class="tier-desc">adding 4 extra concerts</div></div>
+        <div class="tier dim" id="tier-5"><div class="tier-lbl" id="lbl-5">unlock</div><div class="tier-pct">35% off</div><div class="tier-desc">adding 5 extra concerts</div></div>
+      </div>
+      <hr class="divider">
+      <div class="sec-title">This bundle includes</div>
+      <div class="bundle-box">
+        <div class="bitem">
+          <div class="bimg" style="background:#2d3a8c;">🎸</div>
+          <div><div class="bmeta">Saturday, August 1st, 2026 · 09:30 PM</div><div class="bname">Sopa de Cabra</div><div class="bmeta">Mar d'estiu</div></div>
+        </div>
+        <div class="bitem">
+          <div class="bimg" style="background:#3d3d3d;">🍽</div>
+          <div><div class="bname">Cal Blay Gastro Menu</div></div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="sec-title">Add your preference events to the pack</div>
+      <div class="sess-list" id="sess-list"></div>
+    </div>
+  </div>
+  <div class="bot-bar">
+    <div class="bot-l">
+      <span class="bot-lbl">Your selection</span>
+      <span class="bot-cnt" id="bot-cnt">0/5 Sessions added</span>
+      <div class="bot-prog"><div class="bot-fill" id="bot-fill" style="width:0%"></div></div>
+    </div>
+    <div class="bot-r">
+      <span class="unlock-tag" id="unlock-tag" style="display:none"></span>
+      <button class="buy-btn" id="buy-btn" disabled onclick="startSeats()">Buy pack</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN 2: SEAT SELECTION ====== -->
+<div class="screen" id="screen-seats">
+  <div class="seat-nav">
+    <div class="seat-hdr">
+      <div class="shdr-img" id="shdr-img">🎸</div>
+      <div class="shdr-info">
+        <div class="shdr-title">Mar d'estiu custom pack</div>
+        <div class="shdr-sub" id="shdr-sub">Select seats for <strong>Sopa de Cabra</strong></div>
+      </div>
+      <div class="shdr-meta">
+        <div class="shdr-date" id="shdr-date">📅 Saturday, August 1st, 2026 – 9:30 PM</div>
+        <div class="shdr-venue">📍 Auditori Mar d'estiu</div>
+      </div>
+      <button class="more-btn">More info ℹ</button>
+    </div>
+    <div class="seat-bc" id="seat-bc"></div>
+  </div>
+  <div class="seat-body">
+    <div class="sleft">
+      <div class="sleft-hdr">
+        <span class="sleft-title">Price zone list</span>
+        <button class="close-x">✕</button>
+      </div>
+      <div class="zone-list-panel" id="zone-list-panel"></div>
+    </div>
+    <div class="smap" id="smap"></div>
+    <div class="scart">
+      <div class="cart-body" id="cart-body"></div>
+      <div class="cart-foot">
+        <div class="cart-tot-row">
+          <span class="packs-lbl">🎫 <span id="packs-cnt">0</span> Packs</span>
+          <span class="tot-price" id="tot-price">00,00 €</span>
+        </div>
+        <button class="cont-btn" id="cont-btn" disabled onclick="nextStep()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN 3: CHECKOUT ====== -->
+<div class="screen" id="screen-checkout">
+  <nav class="topbar">
+    <div><div class="logo">ONEBO<span>X</span></div><span class="logo-sub">Ticket Distribution System</span></div>
+    <div class="tb-right">
+      <button class="tb-btn">🎁 Gift card</button><button class="tb-btn">❓ Help</button>
+      <div class="tb-div"></div><button class="tb-icon">👤</button><button class="tb-icon">🛒</button>
+    </div>
+  </nav>
+  <div style="flex:1;overflow-y:auto;">
+    <div class="co-wrap">
+      <div class="co-main">
+        <div class="co-card">
+          <h3>Contact information</h3>
+          <div class="frow">
+            <div class="fg"><label>First name</label><input class="finput" value="Maria"></div>
+            <div class="fg"><label>Last name</label><input class="finput" value="García"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Email</label><input class="finput" value="maria@email.com"></div>
+            <div class="fg"><label>Phone</label><input class="finput" value="+34 600 000 000"></div>
+          </div>
+        </div>
+        <div class="co-card">
+          <h3>Payment</h3>
+          <div class="pay-icons"><span class="pico">VISA</span><span class="pico">MC</span><span class="pico">AMEX</span><span class="pico">PayPal</span></div>
+          <div class="frow"><div class="fg" style="flex:2"><label>Card number</label><input class="finput" value="4242 4242 4242 4242"></div></div>
+          <div class="frow">
+            <div class="fg"><label>Expiry</label><input class="finput" value="08/27"></div>
+            <div class="fg"><label>CVV</label><input class="finput" value="123"></div>
+            <div class="fg" style="flex:2"><label>Name on card</label><input class="finput" value="Maria García"></div>
+          </div>
+        </div>
+      </div>
+      <div class="co-sidebar">
+        <div class="sum-card">
+          <div id="co-summary"></div>
+          <button class="co-submit" onclick="completePurchase()">Complete purchase →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN 4: THANK YOU ====== -->
+<div class="screen" id="screen-thankyou">
+  <nav class="topbar">
+    <div><div class="logo">ONEBO<span>X</span></div><span class="logo-sub">Ticket Distribution System</span></div>
+    <div class="tb-right"><button class="tb-btn">🎁 Gift card</button><button class="tb-btn">❓ Help</button></div>
+  </nav>
+  <div style="flex:1;overflow-y:auto;">
+    <div class="ty-wrap">
+      <div class="ty-check">✓</div>
+      <h1 class="ty-h1">You're all set!</h1>
+      <p class="ty-sub">Your Mar d'Estiu 2026 custom pack is confirmed.<br>Tickets will be sent to your email shortly.</p>
+      <div class="ty-disc"><span>🎉</span><span id="ty-disc-txt"></span></div>
+      <div class="ty-box"><h3>🎫 Your pack includes</h3><div id="ty-sessions"></div></div>
+      <div class="ty-acts">
+        <button class="ty-p">📲 Download tickets</button>
+        <button class="ty-s" onclick="resetAll()">Build another pack</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const SESSIONS = [
+  {id:'s1', dow:'FRI',day:31,mon:'JUL',time:'09:30 PM',artist:'ZUCCHERO',               emoji:'🎵',date:'Friday, July 31st',   basePrice:45},
+  {id:'s2', dow:'SUN',day:2, mon:'AUG',time:'09:00 PM',artist:'ELS AMICS DE LES ARTS + GINESTÀ',emoji:'🎶',date:'Sunday, Aug 2nd',    basePrice:38},
+  {id:'s3', dow:'TUE',day:4, mon:'AUG',time:'09:00 PM',artist:'NIÑA PASTORI',           emoji:'🎸',date:'Tuesday, Aug 4th',   basePrice:42},
+  {id:'s4', dow:'WED',day:5, mon:'AUG',time:'09:30 PM',artist:'LOQUILLO',               emoji:'🤘',date:'Wednesday, Aug 5th', basePrice:40},
+  {id:'s5', dow:'THU',day:6, mon:'AUG',time:'09:30 PM',artist:'JOAN DAUSÀ',             emoji:'🎹',date:'Thursday, Aug 6th',  basePrice:36},
+  {id:'s6', dow:'THU',day:7, mon:'AUG',time:'09:30 PM',artist:'ANTONIO JOSÉ',           emoji:'🎤',date:'Thursday, Aug 7th',  basePrice:38},
+  {id:'s7', dow:'SUN',day:9, mon:'AUG',time:'09:30 PM',artist:'MIGUEL RÍOS',            emoji:'⚡',date:'Sunday, Aug 9th',    basePrice:44},
+  {id:'s8', dow:'WED',day:12,mon:'AUG',time:'09:00 PM',artist:'LEIRE MARTÍNEZ + MARLENA',emoji:'🎵',date:'Wednesday, Aug 12th',basePrice:40},
+  {id:'s9', dow:'THU',day:13,mon:'AUG',time:'09:00 PM',artist:"NIT D'HUMOR",            emoji:'😂',date:'Thursday, Aug 13th', basePrice:32},
+  {id:'s10',dow:'SUN',day:16,mon:'AUG',time:'09:30 PM',artist:'SERGIO DALMA',           emoji:'💃',date:'Sunday, Aug 16th',   basePrice:42},
+  {id:'s11',dow:'MON',day:17,mon:'AUG',time:'09:30 PM',artist:'ROSARIO',                emoji:'🌹',date:'Monday, Aug 17th',   basePrice:38},
+];
+const DISC_MAP  = {2:0.15, 3:0.22, 4:0.28, 5:0.35};
+const DISC_LBL  = {2:'15%', 3:'22%', 4:'28%', 5:'35%'};
+const FEES      = 2.00;
+const SOPA_PRICE= 55, GASTRO_PRICE= 28;
+const ACOLORS   = {s1:'#1a3a6b',s2:'#2d5a27',s3:'#6b1a1a',s4:'#3d3d3d',s5:'#1a4d6b',
+                   s6:'#4a1a6b',s7:'#6b4a1a',s8:'#1a6b5a',s9:'#6b6b1a',s10:'#6b1a4a',s11:'#2d3a8c'};
+
+// Single source of truth for zones — always look up here
+const ZONE_DEFS = [
+  {id:'grA',   label:'GRADA A',        color:'#2563eb', price:42},
+  {id:'grB',   label:'GRADA B',        color:'#f59e0b', price:38},
+  {id:'platea',label:'PLATEA CENTRAL', color:'#ef4444', price:35},
+  {id:'prem',  label:'ZONA PREMIUM',   color:'#8b5cf6', price:48},
+  {id:'fan',   label:'ZONA FAN',       color:'#0891b2', price:30},
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let selected   = new Set();
+let steps      = [];   // [{artist,date,emoji,basePrice,seats:[{key,zoneId,zoneName,zoneColor,row,col,price}]}]
+let stepIdx    = 0;
+let curSeats   = [];   // seats being selected for current step
+let packSize   = 0;    // locked after first step confirmed
+let timerSec   = 19*60+23;
+let timerIv    = null;
+// Stable random occupancy map — generated once per session so seats don't change on re-render
+const occMap   = {};
+
+function getOcc(key) {
+  if (!(key in occMap)) occMap[key] = Math.random() < 0.32;
+  return occMap[key];
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function fmt(n) { return n.toFixed(2).replace('.',',') + ' €'; }
+function fmtTimer(s) { const m=Math.floor(s/60),sc=s%60; return `${m}m ${sc<10?'0':''}${sc}s`; }
+function zoneById(id) { return ZONE_DEFS.find(z => z.id === id); }
+
+// ══════════════════════════════════════════
+// PACK BUILDER
+// ══════════════════════════════════════════
+function buildSessions() {
+  const el = document.getElementById('sess-list');
+  el.innerHTML = '';
+  SESSIONS.forEach(s => {
+    const isSel = selected.has(s.id);
+    const row = document.createElement('div');
+    row.className = 'srow' + (isSel ? ' sel' : '');
+    row.innerHTML = `
+      <div class="sdate"><div class="dow">${s.dow}</div><div class="day">${s.day}</div><div class="mon">${s.mon}</div></div>
+      <div class="simg" style="background:${ACOLORS[s.id]}">${s.emoji}</div>
+      <div class="sinfo">
+        <div class="smeta">⏰ ${s.time} &nbsp;|&nbsp; 📍 Auditori Mar d'Estiu</div>
+        <div class="sartist">${s.artist}</div>
+      </div>
+      ${isSel
+        ? `<button class="rem-btn" onclick="toggleS('${s.id}',event)">Remove</button>`
+        : `<button class="add-btn" onclick="toggleS('${s.id}',event)">Add session</button>`}`;
+    el.appendChild(row);
+  });
+  updateBar();
+}
+
+function toggleS(id, e) {
+  e.stopPropagation();
+  if (selected.has(id)) selected.delete(id);
+  else if (selected.size < 5) selected.add(id);
+  buildSessions();
+}
+
+function updateBar() {
+  const n = selected.size;
+  document.getElementById('bot-cnt').textContent = `${n}/5 Sessions added`;
+  document.getElementById('bot-fill').style.width = `${(n/5)*100}%`;
+  document.getElementById('buy-btn').disabled = n < 2;
+  const ut = document.getElementById('unlock-tag');
+  if (n >= 2) { ut.style.display='flex'; ut.textContent=`✓ You've unlocked ${DISC_LBL[n]} off`; }
+  else ut.style.display = 'none';
+  // animate tiers
+  [2,3,4,5].forEach(t => {
+    const el  = document.getElementById('tier-'+t);
+    const lbl = document.getElementById('lbl-'+t);
+    if (n >= t) { el.classList.remove('dim'); el.classList.add('active-tier'); lbl.textContent = '✓ Unlocked'; }
+    else        { el.classList.add('dim'); el.classList.remove('active-tier'); lbl.textContent = t===2 ? 'starting from' : 'unlock'; }
+  });
+}
+
+// ══════════════════════════════════════════
+// SEAT SELECTION — entry
+// ══════════════════════════════════════════
+function startSeats() {
+  steps = [
+    {artist:'Sopa de Cabra', date:'Saturday, August 1st, 2026 – 9:30 PM', emoji:'🎸', basePrice:SOPA_PRICE, seats:[]},
+    ...Array.from(selected).map(id => {
+      const s = SESSIONS.find(x => x.id === id);
+      return {artist:s.artist, date:`${s.date}, 2026`, emoji:s.emoji, basePrice:s.basePrice, seats:[]};
+    }),
+  ];
+  stepIdx = 0; curSeats = []; packSize = 0;
+  showScreen('screen-seats');
+  renderStep();
+}
+
+function renderStep() {
+  const s = steps[stepIdx];
+  document.getElementById('shdr-img').textContent  = s.emoji;
+  document.getElementById('shdr-sub').innerHTML    = `Select seats for <strong>${s.artist}</strong>`;
+  document.getElementById('shdr-date').textContent = `📅 ${s.date}`;
+  buildBreadcrumb();
+  buildZonePanel();
+  buildOverviewMap();
+  curSeats = [];
+  renderCart();
+}
+
+// ── BREADCRUMB ──
+function buildBreadcrumb() {
+  const bc = document.getElementById('seat-bc');
+  bc.innerHTML = '';
+  steps.forEach((s, i) => {
+    const done = i < stepIdx, active = i === stepIdx;
+    const div  = document.createElement('div');
+    div.className = 'bc-step' + (active?' bc-active':'') + (done?' bc-done':'');
+    const label = s.artist.split(' ').slice(0,2).join(' ');
+    div.innerHTML = `<div class="bc-num">${done?'✓':i+1}</div><span class="bc-label">${label}</span>`;
+    bc.appendChild(div);
+  });
+}
+
+// ── LEFT ZONE PANEL ──
+function buildZonePanel() {
+  const panel = document.getElementById('zone-list-panel');
+  panel.innerHTML = '';
+  ZONE_DEFS.forEach((z, i) => {
+    const d = document.createElement('div');
+    d.className = 'zitem' + (i===0?' zactive':'');
+    d.innerHTML = `<div class="zname"><div class="zdot" style="background:${z.color}"></div>${z.label}</div><div class="zprice">${z.price.toFixed(2)} €</div>`;
+    d.onclick = () => {
+      document.querySelectorAll('.zitem').forEach(x => x.classList.remove('zactive'));
+      d.classList.add('zactive');
+      buildZoomedMap(z.id);
+    };
+    panel.appendChild(d);
+  });
+}
+
+// ── OVERVIEW MAP (auditorium fan) ──
+function buildOverviewMap() {
+  const mp = document.getElementById('smap');
+  mp.innerHTML = '';
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 460 360');
+  svg.setAttribute('width','460'); svg.setAttribute('height','360');
+
+  // Zone shapes: fan-shaped auditorium, widest at top (back) narrowing to stage
+  const shapes = [
+    {id:'grA',   path:'M 60,20  L 400,20  L 370,90  L 90,90  Z'},
+    {id:'grB',   path:'M 90,95  L 370,95  L 340,160 L 120,160 Z'},
+    {id:'platea',path:'M120,165 L 340,165 L 315,230 L 145,230 Z'},
+    {id:'prem',  path:'M145,235 L 315,235 L 295,285 L 165,285 Z'},
+    {id:'fan',   path:'M165,290 L 295,290 L 280,325 L 180,325 Z'},
+  ];
+
+  shapes.forEach(sh => {
+    const z = zoneById(sh.id);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', sh.path);
+    path.setAttribute('fill', z.color);
+    path.setAttribute('opacity','0.85');
+    path.setAttribute('stroke','#fff');
+    path.setAttribute('stroke-width','2');
+    path.style.cursor = 'pointer';
+    path.addEventListener('mouseenter', () => path.setAttribute('opacity','1'));
+    path.addEventListener('mouseleave', () => path.setAttribute('opacity','0.85'));
+    path.addEventListener('click', () => buildZoomedMap(z.id));
+    svg.appendChild(path);
+
+    // label centroid
+    const nums = sh.path.match(/-?\d+\.?\d*/g).map(Number);
+    const xs=[],ys=[];
+    for (let i=0;i<nums.length;i+=2){xs.push(nums[i]);ys.push(nums[i+1]);}
+    const cx = xs.reduce((a,b)=>a+b,0)/xs.length;
+    const cy = ys.reduce((a,b)=>a+b,0)/ys.length;
+    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x', cx); txt.setAttribute('y', cy+4);
+    txt.setAttribute('text-anchor','middle');
+    txt.setAttribute('fill','white'); txt.setAttribute('font-size','11'); txt.setAttribute('font-weight','700');
+    txt.setAttribute('pointer-events','none');
+    txt.textContent = z.label;
+    svg.appendChild(txt);
+  });
+
+  // Stage
+  const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  rect.setAttribute('x','175'); rect.setAttribute('y','335');
+  rect.setAttribute('width','110'); rect.setAttribute('height','20');
+  rect.setAttribute('rx','4'); rect.setAttribute('fill','#1f2937');
+  svg.appendChild(rect);
+  const stxt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  stxt.setAttribute('x','230'); stxt.setAttribute('y','349');
+  stxt.setAttribute('text-anchor','middle'); stxt.setAttribute('fill','white');
+  stxt.setAttribute('font-size','10'); stxt.setAttribute('font-weight','700');
+  stxt.textContent = 'ESCENARI';
+  svg.appendChild(stxt);
+
+  const hint = document.createElement('p');
+  hint.style.cssText = 'position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;color:#999;pointer-events:none;';
+  hint.textContent = 'Click on a zone to select seats';
+
+  mp.appendChild(hint);
+  mp.appendChild(svg);
+  addZoomControls(mp);
+}
+
+// ── ZOOMED SEAT VIEW ──
+function buildZoomedMap(zoneId) {
+  const z = zoneById(zoneId);   // always look up from ZONE_DEFS — price guaranteed
+  if (!z) return;
+
+  const mp = document.getElementById('smap');
+  mp.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'background:#fff;border:1px solid #e0ddd8;border-radius:10px;padding:14px;overflow:auto;max-height:100%;min-width:380px;';
+
+  // Title
+  const title = document.createElement('div');
+  title.style.cssText = `font-size:13px;font-weight:700;color:${z.color};margin-bottom:6px;text-align:center;`;
+  title.textContent = `${z.label} — ${z.price.toFixed(2)} € per seat`;
+  wrap.appendChild(title);
+
+  // Pack-size hint for steps > 0
+  if (stepIdx > 0 && packSize > 0) {
+    const ph = document.createElement('div');
+    ph.style.cssText = 'font-size:11px;color:#6b7280;text-align:center;margin-bottom:8px;background:#f5f5f5;border-radius:5px;padding:4px 8px;';
+    ph.textContent = `Select exactly ${packSize} seat${packSize>1?'s':''} — same as first session`;
+    wrap.appendChild(ph);
+  }
+
+  // Legend
+  const leg = document.createElement('div');
+  leg.style.cssText = 'display:flex;gap:12px;font-size:10px;color:#6b7280;margin-bottom:8px;justify-content:center;flex-wrap:wrap;';
+  leg.innerHTML = `
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${z.color};margin-right:3px;vertical-align:middle;"></span>Available</span>
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#d1d5db;margin-right:3px;vertical-align:middle;"></span>Occupied</span>
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1a1f5e;outline:2px solid #e85c45;outline-offset:1px;border-radius:50%;margin-right:3px;vertical-align:middle;"></span>Selected</span>`;
+  wrap.appendChild(leg);
+
+  const ROWS = 10, COLS = 16;
+
+  for (let r = ROWS; r >= 1; r--) {
+    const rowDiv = document.createElement('div');
+    rowDiv.style.cssText = 'display:flex;align-items:center;gap:3px;margin-bottom:3px;';
+
+    const rl = document.createElement('span');
+    rl.style.cssText = 'width:22px;text-align:right;font-size:9px;color:#9ca3af;flex-shrink:0;';
+    rl.textContent = 'F' + r;
+    rowDiv.appendChild(rl);
+
+    for (let c = 1; c <= COLS; c++) {
+      const key = `${zoneId}-r${r}-c${c}`;
+      const occ = getOcc(key);
+      const isSel = curSeats.some(s => s.key === key);
+
+      const circ = document.createElement('div');
+      circ.title = occ ? 'Occupied' : `${z.label} · Row F${r} · Seat ${c} · ${z.price.toFixed(2)}€`;
+
+      let bg, outline='', cursor='pointer';
+      if (occ)   { bg='#d1d5db'; cursor='not-allowed'; }
+      else if (isSel) { bg='#1a1f5e'; outline='outline:2px solid #e85c45;outline-offset:1px;'; }
+      else       { bg = z.color; }
+
+      circ.style.cssText = `width:16px;height:16px;border-radius:50%;flex-shrink:0;transition:transform .1s;cursor:${cursor};background:${bg};${outline}`;
+
+      if (!occ) {
+        circ.addEventListener('mouseenter', () => { if (!curSeats.some(s=>s.key===key)) circ.style.transform='scale(1.3)'; });
+        circ.addEventListener('mouseleave', () => circ.style.transform='scale(1)');
+        circ.addEventListener('click', () => toggleSeat(key, r, c, z, zoneId));
+      }
+      rowDiv.appendChild(circ);
+    }
+
+    const rl2 = document.createElement('span');
+    rl2.style.cssText = 'width:22px;font-size:9px;color:#9ca3af;flex-shrink:0;';
+    rl2.textContent = 'F' + r;
+    rowDiv.appendChild(rl2);
+    wrap.appendChild(rowDiv);
+  }
+
+  const backBtn = document.createElement('button');
+  backBtn.textContent = '← Back to map';
+  backBtn.style.cssText = 'margin-top:10px;display:block;background:none;border:1px solid #e0ddd8;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px;color:#6b7280;';
+  backBtn.onclick = () => buildOverviewMap();
+  wrap.appendChild(backBtn);
+
+  mp.appendChild(wrap);
+  addZoomControls(mp);
+}
+
+// ── TOGGLE SEAT ──
+function toggleSeat(key, row, col, zone, zoneId) {
+  const idx = curSeats.findIndex(s => s.key === key);
+
+  if (idx >= 0) {
+    // Deselect
+    curSeats.splice(idx, 1);
+    // If step 0, update packSize live as user removes seats
+    if (stepIdx === 0) packSize = curSeats.length;
+  } else {
+    // Enforce cap:
+    // Step 0: max 8 (user chooses pack size)
+    // Step 1+: must equal packSize
+    if (stepIdx === 0 && curSeats.length >= 8) return;
+    if (stepIdx > 0  && curSeats.length >= packSize) return;
+
+    curSeats.push({key, zoneId, zoneName:zone.label, zoneColor:zone.color, row, col, price:zone.price});
+    // Lock packSize progressively on step 0 (will be confirmed on Continue)
+    if (stepIdx === 0) packSize = curSeats.length;
+  }
+
+  // Redraw zoomed map to reflect selection
+  buildZoomedMap(zoneId);
+  renderCart();
+}
+
+// ── ZOOM CONTROLS ──
+function addZoomControls(mp) {
+  const div = document.createElement('div');
+  div.className = 'zoom-ctrls';
+  div.innerHTML = `
+    <button class="zbtn" title="Zoom in" onclick="zoomInDefault()">+</button>
+    <button class="zbtn" title="Zoom out" onclick="buildOverviewMap()">−</button>
+    <button class="zbtn" title="Overview" onclick="buildOverviewMap()">⤢</button>`;
+  mp.appendChild(div);
+}
+function zoomInDefault() { buildZoomedMap('grA'); }
+
+// ── CART RENDER ──
+function renderCart() {
+  const body   = document.getElementById('cart-body');
+  const isFirst = stepIdx === 0;
+
+  if (curSeats.length === 0) {
+    body.innerHTML = isFirst
+      ? `<div class="cart-empty"><div class="ce-icon">ℹ</div><div class="ce-title">Choose how many seats you need</div><div class="ce-sub">This will define the number of tickets across every session in your pack</div></div>`
+      : `<div class="cart-empty"><div class="ce-icon">🛒</div><div class="ce-title">Cart is empty</div><div class="ce-sub">Add tickets to continue</div></div>`;
+    document.getElementById('packs-cnt').textContent = '0';
+    document.getElementById('tot-price').textContent = '00,00 €';
+    document.getElementById('cont-btn').disabled = true;
+    return;
+  }
+
+  // Start timer on first seat added in step 0
+  if (!timerIv && stepIdx === 0) startTimer();
+
+  let html = `<div class="cart-timer">⏱ The cart expires in <span id="timer-disp">${fmtTimer(timerSec)}</span></div>`;
+  let total = 0;
+
+  curSeats.forEach(s => {
+    total += s.price;
+    html += `
+      <div class="citem">
+        <div class="citem-zone" style="border-left:3px solid ${s.zoneColor};">${s.zoneName}</div>
+        <div class="citem-seat">Row F${s.row} · Seat ${s.col}</div>
+        <div class="citem-acts">
+          <button class="ca" onclick="removeSeatByKey('${s.key}','${s.zoneId}')">🗑</button>
+        </div>
+        <div class="citem-price">${s.price.toFixed(2)} €</div>
+      </div>`;
+  });
+
+  const n = curSeats.length;
+  html += `<div class="cart-fees"><span>Fees</span><span>${FEES.toFixed(2)} €</span></div>`;
+
+  // Hint for subsequent steps
+  if (!isFirst && packSize > 0 && n < packSize) {
+    html += `<div class="cart-hint">Select ${packSize-n} more seat${(packSize-n)>1?'s':''} (${n} / ${packSize})</div>`;
+  }
+
+  body.innerHTML = html;
+  document.getElementById('packs-cnt').textContent = n;
+  document.getElementById('tot-price').textContent = fmt(total + FEES);
+
+  // Continue enabled: step 0 needs ≥1 seat; step 1+ needs exactly packSize
+  const ready = isFirst ? n >= 1 : n === packSize;
+  document.getElementById('cont-btn').disabled = !ready;
+
+  // Re-attach timer
+  const td = document.getElementById('timer-disp');
+  if (td) td.textContent = fmtTimer(timerSec);
+}
+
+function removeSeatByKey(key, zoneId) {
+  const idx = curSeats.findIndex(s => s.key === key);
+  if (idx >= 0) {
+    curSeats.splice(idx, 1);
+    if (stepIdx === 0) packSize = curSeats.length;
+    buildZoomedMap(zoneId);
+    renderCart();
+  }
+}
+
+function startTimer() {
+  timerIv = setInterval(() => {
+    timerSec--; if (timerSec < 0) timerSec = 0;
+    const td = document.getElementById('timer-disp');
+    if (td) td.textContent = fmtTimer(timerSec);
+  }, 1000);
+}
+
+// ── ADVANCE STEP ──
+function nextStep() {
+  // Confirm packSize on step 0 (locks for all subsequent)
+  if (stepIdx === 0) packSize = curSeats.length;
+  steps[stepIdx].seats = [...curSeats];
+
+  if (stepIdx < steps.length - 1) {
+    stepIdx++; curSeats = [];
+    renderStep();
+  } else {
+    if (timerIv) { clearInterval(timerIv); timerIv = null; }
+    buildCheckout();
+    showScreen('screen-checkout');
+  }
+}
+
+// ══════════════════════════════════════════
+// CHECKOUT
+// ══════════════════════════════════════════
+function buildCheckout() {
+  const n = selected.size;
+  const disc    = DISC_MAP[n] || 0;
+  const discLbl = DISC_LBL[n] || '';
+  const el = document.getElementById('co-summary');
+  if (!el) return;
+
+  let sub = SOPA_PRICE + GASTRO_PRICE;
+  let html = `<h3>Order summary</h3>
+    <div class="ssess">
+      <div class="ssess-name">🎸 Sopa de Cabra</div>
+      <div class="ssess-seat">Sat, Aug 1st · ${steps[0].seats.length} seat(s)</div>
+      <div class="ssess-price">${SOPA_PRICE.toFixed(2)} €</div>
+    </div>
+    <div class="ssess">
+      <div class="ssess-name">🍽 Cal Blay Gastro Menu</div>
+      <div class="ssess-price">${GASTRO_PRICE.toFixed(2)} €</div>
+    </div>`;
+
+  Array.from(selected).forEach((id, i) => {
+    const s  = SESSIONS.find(x => x.id === id);
+    const st = steps[i + 1];
+    sub += s.basePrice;
+    html += `<div class="ssess">
+      <div class="ssess-name">${s.emoji} ${s.artist}</div>
+      <div class="ssess-seat">${s.date} · ${st ? st.seats.length : packSize} seat(s)</div>
+      <div class="ssess-price">${s.basePrice.toFixed(2)} €</div>
+    </div>`;
+  });
+
+  const discAmt  = sub * disc;
+  const feeTotal = FEES * packSize;
+  const total    = sub - discAmt + feeTotal;
+
+  html += `
+    <hr class="sdiv">
+    <div class="sline"><span>Subtotal</span><span class="sp">${sub.toFixed(2)} €</span></div>
+    <div class="sdisc"><span>✓ Pack discount (${discLbl})</span><span>−${discAmt.toFixed(2)} €</span></div>
+    <div class="sline"><span>Management fees</span><span class="sp">${feeTotal.toFixed(2)} €</span></div>
+    <hr class="sdiv">
+    <div class="stot"><span>Total</span><span>${total.toFixed(2)} €</span></div>`;
+  el.innerHTML = html;
+}
+
+function completePurchase() {
+  buildThankYou();
+  showScreen('screen-thankyou');
+}
+
+// ══════════════════════════════════════════
+// THANK YOU
+// ══════════════════════════════════════════
+function buildThankYou() {
+  const n = selected.size;
+  document.getElementById('ty-disc-txt').textContent = `You saved ${DISC_LBL[n]||''} on your pack — great choice!`;
+  const el = document.getElementById('ty-sessions');
+  let html = `
+    <div class="ty-sess"><div class="ty-si">🎸</div><div class="ty-sinfo"><div class="ty-sa">Sopa de Cabra</div><div class="ty-sd">Saturday, August 1st · 9:30 PM</div></div><div class="ty-seat">✓ Confirmed</div></div>
+    <div class="ty-sess"><div class="ty-si">🍽</div><div class="ty-sinfo"><div class="ty-sa">Cal Blay Gastro Menu</div><div class="ty-sd">Included in pack</div></div><div class="ty-seat">Included</div></div>`;
+  Array.from(selected).forEach(id => {
+    const s = SESSIONS.find(x => x.id === id);
+    html += `<div class="ty-sess"><div class="ty-si">${s.emoji}</div><div class="ty-sinfo"><div class="ty-sa">${s.artist}</div><div class="ty-sd">${s.date}, 2026</div></div><div class="ty-seat">✓ Confirmed</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════
+function resetAll() {
+  selected.clear(); steps=[]; stepIdx=0; curSeats=[]; packSize=0;
+  timerSec=19*60+23;
+  if (timerIv) { clearInterval(timerIv); timerIv=null; }
+  buildSessions();
+  showScreen('screen-builder');
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+buildSessions();
+</script>
+</body>
+</html>
