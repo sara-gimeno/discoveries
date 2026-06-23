@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barça Basket — Create your match pack</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#0099cc;--blue-h:#007aa3;--blue-light:#e6f6fb;
+  --green:#22a06b;--green-light:#e6f7f1;
+  --navy:#1a1a2e;--dark:#111;
+  --bg:#f5f5f5;--white:#fff;--border:#e0ddd8;--text:#1a1a1a;
+  --muted:#6b7280;--muted-l:#9ca3af;
+  --barca-blue:#004d99;--barca-red:#a50044;
+}
+html,body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;flex-shrink:0;}
+.logo{font-size:17px;font-weight:800;letter-spacing:-.5px;color:#1a1a1a;}
+.logo span{color:#e85c45;}
+.logo-sub{color:var(--muted);font-size:10px;font-weight:400;display:block;line-height:1;}
+.tb-right{display:flex;gap:8px;align-items:center;}
+.tb-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.tb-icon{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:18px;}
+.tb-div{width:1px;height:20px;background:var(--border);}
+
+/* HERO */
+.hero{height:260px;background:linear-gradient(160deg,#004d99 0%,#a50044 60%,#1a1a2e 100%);display:flex;align-items:flex-end;padding:0;position:relative;overflow:hidden;flex-shrink:0;}
+.hero-pattern{position:absolute;inset:0;opacity:.08;background-image:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.5) 10px,rgba(255,255,255,.5) 11px);}
+.hero-court{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.12;}
+.hero-court svg{width:340px;height:200px;}
+.hero-photos{position:absolute;right:20px;bottom:16px;}
+.hero-photos button{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+
+/* PACK BUILDER CONTENT */
+.pack-wrap{max-width:860px;margin:0 auto;padding:24px;width:100%;}
+.pack-h2{font-size:22px;font-weight:700;}
+.pack-loc{color:var(--muted);font-size:12px;margin-top:5px;display:flex;align-items:center;gap:4px;}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.sec-title{font-size:15px;font-weight:600;margin-bottom:10px;}
+.info-txt{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
+.incl-list{list-style:none;display:flex;flex-direction:column;gap:4px;margin-bottom:4px;}
+.incl-list li{font-size:13px;display:flex;align-items:center;gap:6px;}
+.incl-list li::before{content:'✓';color:var(--green);font-weight:700;font-size:12px;}
+
+/* DISCOUNT TIERS */
+.disc-label{font-size:13px;font-weight:600;margin:14px 0 10px;}
+.tiers{display:flex;gap:10px;max-width:500px;}
+.tier{flex:1;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;transition:border-color .3s,background .3s,opacity .3s;}
+.tier.dim{opacity:.4;}
+.tier.active-tier{border-color:var(--green);background:var(--green-light);}
+.tier-lbl{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.tier-pct{font-size:20px;font-weight:800;color:var(--green);}
+.tier-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;}
+
+/* MATCH GROUPS */
+.match-groups{display:flex;flex-direction:column;gap:0;}
+.group-label{font-size:13px;font-weight:700;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;border-top:1px solid var(--border);padding-top:14px;}
+.group-label:first-child{border-top:none;padding-top:0;}
+.match-list{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.mrow{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--white);transition:background .15s;}
+.mrow+.mrow{border-top:1px solid var(--border);}
+.mrow.sel{background:#f0faff;}
+.mdate{width:50px;text-align:center;flex-shrink:0;border:1px solid var(--border);border-radius:6px;padding:5px 4px;background:#fafafa;}
+.mdate .dow{font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;}
+.mdate .day{font-size:20px;font-weight:800;line-height:1;}
+.mdate .mon{font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;}
+.minfo{flex:1;}
+.mmeta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+.mmatch{font-size:14px;font-weight:700;letter-spacing:.1px;}
+.add-btn{background:var(--blue);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;}
+.add-btn:hover{background:var(--blue-h);}
+.rem-btn{background:none;color:var(--text);border:1.5px solid var(--border);padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.rem-btn:hover{border-color:#999;}
+
+/* BOTTOM BAR */
+.bot-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;z-index:100;flex-shrink:0;}
+.bot-l{display:flex;flex-direction:column;gap:2px;}
+.bot-lbl{font-size:12px;color:var(--muted);}
+.bot-cnt{font-size:15px;font-weight:700;}
+.bot-prog{width:200px;height:5px;background:var(--border);border-radius:3px;margin-top:4px;overflow:hidden;}
+.bot-fill{height:100%;background:var(--green);border-radius:3px;transition:width .3s;}
+.bot-r{display:flex;align-items:center;gap:12px;}
+.disc-tag{font-size:13px;color:var(--green);font-weight:600;}
+.buy-btn{background:var(--blue);color:#fff;border:none;padding:9px 22px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s,opacity .15s;}
+.buy-btn:disabled{opacity:.4;cursor:not-allowed;background:var(--muted-l);}
+.buy-btn:not(:disabled):hover{background:var(--blue-h);}
+
+/* SEAT SCREEN */
+#screen-seats{background:#f0f0f0;}
+.seat-topbar{background:var(--navy);position:sticky;top:0;z-index:200;flex-shrink:0;}
+.seat-hdr{display:flex;align-items:center;gap:16px;padding:10px 16px;}
+.shdr-back{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;flex-shrink:0;}
+.shdr-img{width:60px;height:46px;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;}
+.shdr-info{flex:1;}
+.shdr-title{color:#fff;font-size:15px;font-weight:700;}
+.shdr-sub{color:rgba(255,255,255,.6);font-size:12px;margin-top:1px;}
+.shdr-meta{display:flex;flex-direction:column;gap:3px;align-items:flex-end;}
+.shdr-date{color:rgba(255,255,255,.75);font-size:12px;display:flex;align-items:center;gap:4px;}
+.shdr-venue{color:rgba(255,255,255,.5);font-size:11px;display:flex;align-items:center;gap:4px;}
+.more-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 10px;border-radius:5px;font-size:11px;cursor:pointer;margin-left:12px;}
+
+/* SEAT BODY */
+.seat-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* MAP AREA */
+.smap-area{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.smap-toolbar{padding:10px 14px;display:flex;align-items:center;gap:8px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;}
+.filter-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.back-zone-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.zone-breadcrumb{font-size:13px;font-weight:700;color:var(--text);}
+.smap-content{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden;position:relative;}
+.zoom-ctrls{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;gap:4px;}
+.zbtn{width:32px;height:32px;background:#fff;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+/* RIGHT PANEL */
+.seat-right{width:300px;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+
+/* tabs */
+.rtabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rtab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.rtab.active{color:var(--text);border-bottom-color:var(--text);}
+
+/* price list */
+.price-list{flex:1;overflow-y:auto;padding:0;}
+.pzone{display:flex;flex-direction:column;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.pzone:hover{background:#f9f9f9;}
+.pzone-name{font-size:13px;font-weight:600;}
+.pzone-from{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.pzone-price{font-size:15px;font-weight:800;}
+.sort-bar{display:flex;justify-content:flex-end;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sort-btn{background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:3px;}
+
+/* cart (your tickets tab) */
+.cart-panel{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:24px;text-align:center;color:var(--muted);}
+.ce-icon{font-size:36px;opacity:.25;margin-bottom:10px;}
+.ce-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.ce-sub{font-size:12px;color:var(--muted);line-height:1.4;}
+.cart-timer{font-size:12px;color:var(--blue);display:flex;align-items:center;gap:5px;margin-bottom:10px;font-weight:500;}
+.citem{border:1.5px solid var(--border);border-radius:7px;padding:10px;margin-bottom:8px;position:relative;}
+.citem-zone{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:2px;}
+.citem-seat{font-size:11px;color:var(--muted);}
+.citem-price{font-size:13px;font-weight:700;text-align:right;margin-top:4px;}
+.citem-acts{position:absolute;top:8px;right:8px;display:flex;gap:3px;}
+.ca{background:none;border:1px solid var(--border);border-radius:4px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--muted);}
+.cart-fees{font-size:12px;color:var(--muted);padding:6px 0;display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:2px;}
+
+.cart-foot{padding:12px 14px;border-top:1px solid var(--border);background:#fff;flex-shrink:0;}
+.cart-tot-row{display:flex;align-items:center;justify-content:space-between;}
+.packs-lbl{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.tot-price{font-size:18px;font-weight:800;}
+.cont-btn{width:100%;margin-top:9px;background:var(--blue);color:#fff;border:none;padding:10px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.cont-btn:hover:not(:disabled){opacity:.9;}
+.cont-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* CHECKOUT */
+#screen-checkout{background:var(--bg);}
+.co-wrap{max-width:860px;margin:0 auto;padding:28px 24px;display:flex;gap:24px;align-items:flex-start;}
+.co-main{flex:1;display:flex;flex-direction:column;gap:18px;}
+.co-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;}
+.co-card h3{font-size:15px;font-weight:700;margin-bottom:14px;}
+.frow{display:flex;gap:12px;margin-bottom:12px;}
+.fg{flex:1;display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.finput{border:1.5px solid var(--border);border-radius:6px;padding:9px 11px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s;width:100%;}
+.finput:focus{border-color:var(--navy);}
+.pay-icons{display:flex;gap:8px;margin-bottom:14px;}
+.pico{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:4px 9px;font-size:11px;font-weight:600;color:var(--muted);}
+.co-sidebar{width:280px;flex-shrink:0;}
+.sum-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;position:sticky;top:76px;}
+.sum-card h3{font-size:14px;font-weight:700;margin-bottom:12px;}
+.sline{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;color:var(--muted);}
+.sline .sp{font-weight:600;color:var(--text);}
+.sdiv{border:none;border-top:1px solid var(--border);margin:8px 0;}
+.sdisc{color:var(--green);font-weight:600;font-size:13px;display:flex;justify-content:space-between;margin-bottom:7px;}
+.stot{display:flex;justify-content:space-between;font-size:16px;font-weight:800;margin-top:5px;}
+.smatch{border:1px solid var(--border);border-radius:7px;padding:9px;margin-bottom:7px;}
+.smatch-name{font-size:13px;font-weight:600;}
+.smatch-date{font-size:11px;color:var(--muted);margin-top:1px;}
+.smatch-price{font-size:12px;font-weight:600;text-align:right;margin-top:3px;}
+.co-submit{width:100%;background:var(--blue);color:#fff;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;transition:background .15s;box-shadow:0 4px 12px rgba(0,153,204,.3);}
+.co-submit:hover{background:var(--blue-h);}
+
+/* THANK YOU */
+#screen-thankyou{background:var(--bg);}
+.ty-wrap{max-width:580px;margin:0 auto;padding:48px 24px;text-align:center;}
+.ty-check{width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:32px;color:#fff;}
+.ty-h1{font-size:28px;font-weight:800;margin-bottom:7px;}
+.ty-sub{font-size:15px;color:var(--muted);margin-bottom:28px;line-height:1.5;}
+.ty-disc{background:var(--green-light);color:var(--green);border:1px solid rgba(34,160,107,.2);border-radius:6px;padding:10px 14px;margin-bottom:22px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.ty-box{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;text-align:left;margin-bottom:22px;}
+.ty-box h3{font-size:14px;font-weight:700;margin-bottom:12px;}
+.ty-match{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.ty-match:last-child{border-bottom:none;}
+.ty-mi{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
+.ty-minfo .ty-ma{font-size:13px;font-weight:600;}
+.ty-minfo .ty-md{font-size:11px;color:var(--muted);margin-top:1px;}
+.ty-mseat{font-size:11px;color:var(--muted);margin-left:auto;flex-shrink:0;}
+.ty-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.ty-p{background:var(--blue);color:#fff;border:none;padding:11px 22px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;}
+.ty-s{background:#fff;color:var(--text);border:1.5px solid var(--border);padding:11px 22px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;}
+
+/* seat circle */
+.sc{width:18px;height:18px;border-radius:50%;cursor:pointer;transition:transform .1s,outline .1s;flex-shrink:0;}
+.sc:hover{transform:scale(1.25);}
+.sc.avail{background:#22c55e;}
+.sc.occ{background:#d1d5db;cursor:not-allowed;}
+.sc.picked{background:#1a1a2e;outline:2px solid var(--blue);outline-offset:1px;}
+.seat-row-line{display:flex;align-items:center;gap:3px;margin-bottom:4px;}
+.seat-row-lbl{width:28px;font-size:10px;color:var(--muted);text-align:right;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- ====== SCREEN 1: PACK BUILDER ====== -->
+<div class="screen active" id="screen-builder">
+  <nav class="topbar">
+    <div>
+      <div class="logo">ONEBO<span>X</span></div>
+      <span class="logo-sub">Ticket Distribution System</span>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn">🎁 Gift card</button>
+      <button class="tb-btn">❓ Help</button>
+      <div class="tb-div"></div>
+      <button class="tb-icon">👤</button>
+      <button class="tb-icon">🛒</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-pattern"></div>
+    <!-- Court silhouette -->
+    <div class="hero-court">
+      <svg viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="300" height="160" rx="4" stroke="white" stroke-width="2"/>
+        <circle cx="170" cy="100" r="30" stroke="white" stroke-width="2"/>
+        <line x1="170" y1="20" x2="170" y2="180" stroke="white" stroke-width="2"/>
+        <rect x="20" y="60" width="60" height="80" stroke="white" stroke-width="2"/>
+        <rect x="260" y="60" width="60" height="80" stroke="white" stroke-width="2"/>
+        <circle cx="50" cy="100" r="15" stroke="white" stroke-width="1.5"/>
+        <circle cx="290" cy="100" r="15" stroke="white" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="hero-photos"><button>🖼 View photos</button></div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;">
+    <div class="pack-wrap">
+      <div style="margin-bottom:6px;">
+        <div class="pack-h2">Create your match pack</div>
+        <div class="pack-loc">📍 Palau Blaugrana</div>
+      </div>
+      <hr class="divider">
+      <div class="sec-title">Information</div>
+      <p class="info-txt">Build your own match experience with the freedom to choose the games that fit your schedule. The more games you add, the bigger your discount.</p>
+      <div class="sec-title" style="margin-bottom:8px;">How to get your custom pack</div>
+      <ul class="incl-list">
+        <li>Custom pack with a <strong>minimum of 3 games</strong> and up to 7 games</li>
+        <li>From <strong>-20% to -50% discount</strong> depending on the number of games included</li>
+        <li>Same seats apply to all selected matches — one single seat selection</li>
+        <li>Check all the details at "+ info"</li>
+      </ul>
+      <div class="disc-label">How does the discount work?</div>
+      <div class="tiers">
+        <div class="tier dim" id="tier-3">
+          <div class="tier-lbl" id="lbl-3">starting from</div>
+          <div class="tier-pct">20% off</div>
+          <div class="tier-desc">selecting 3 games</div>
+        </div>
+        <div class="tier dim" id="tier-5">
+          <div class="tier-lbl" id="lbl-5">unlock</div>
+          <div class="tier-pct">50% off</div>
+          <div class="tier-desc">adding +5 games or more</div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="sec-title">Create your match pack</div>
+      <div class="match-groups" id="match-groups"></div>
+    </div>
+  </div>
+
+  <div class="bot-bar" id="bot-bar" style="display:none;">
+    <div class="bot-l">
+      <span class="bot-lbl">Your selection</span>
+      <span class="bot-cnt" id="bot-cnt">0/7 Sessions added</span>
+      <div class="bot-prog"><div class="bot-fill" id="bot-fill" style="width:0%"></div></div>
+    </div>
+    <div class="bot-r">
+      <span class="disc-tag" id="disc-tag" style="display:none;"></span>
+      <button class="buy-btn" id="buy-btn" disabled onclick="startSeats()">Buy pack</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN 2: SEAT SELECTION ====== -->
+<div class="screen" id="screen-seats">
+  <div class="seat-topbar">
+    <div class="seat-hdr">
+      <button class="shdr-back" onclick="showScreen('screen-builder')">‹</button>
+      <div class="shdr-img" id="shdr-img">🏀</div>
+      <div class="shdr-info">
+        <div class="shdr-title">Create your match pack</div>
+        <div class="shdr-sub">Select seats for <strong>your sessions selection</strong></div>
+      </div>
+      <div class="shdr-meta">
+        <div class="shdr-date">📅 Various dates</div>
+        <div class="shdr-venue">📍 Palau Blaugrana, Barcelona</div>
+      </div>
+      <button class="more-btn">More info ℹ</button>
+    </div>
+  </div>
+
+  <div class="seat-body">
+    <!-- Map -->
+    <div class="smap-area">
+      <div class="smap-toolbar" id="smap-toolbar">
+        <button class="filter-btn" onclick="toggleFilter()">⚙ Filter</button>
+        <!-- zone breadcrumb injected here when zoomed -->
+      </div>
+      <div class="smap-content" id="smap-content">
+        <!-- overview or zoom injected -->
+      </div>
+      <div class="zoom-ctrls">
+        <button class="zbtn" onclick="zoomIn()">+</button>
+        <button class="zbtn" onclick="zoomOut()">−</button>
+        <button class="zbtn" onclick="zoomOut()">⤢</button>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="seat-right">
+      <div class="rtabs" id="rtabs">
+        <div class="rtab active" id="tab-pricelist" onclick="switchTab('pricelist')">≡ Price list</div>
+        <div class="rtab" id="tab-tickets" onclick="switchTab('tickets')">🎫 Your tickets</div>
+      </div>
+      <!-- price list content -->
+      <div id="panel-pricelist" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="sort-bar"><button class="sort-btn">Sort by price ↑</button></div>
+        <div class="price-list" id="price-list"></div>
+      </div>
+      <!-- tickets cart -->
+      <div id="panel-tickets" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="cart-panel" id="cart-panel"></div>
+      </div>
+      <div class="cart-foot">
+        <div class="cart-tot-row">
+          <span class="packs-lbl">🎫 <span id="packs-cnt">0</span> Packs</span>
+          <span class="tot-price" id="tot-price">00,00 €</span>
+        </div>
+        <button class="cont-btn" id="cont-btn" disabled onclick="goCheckout()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN 3: CHECKOUT ====== -->
+<div class="screen" id="screen-checkout">
+  <nav class="topbar">
+    <div><div class="logo">ONEBO<span>X</span></div><span class="logo-sub">Ticket Distribution System</span></div>
+    <div class="tb-right">
+      <button class="tb-btn">🎁 Gift card</button><button class="tb-btn">❓ Help</button>
+      <div class="tb-div"></div><button class="tb-icon">👤</button><button class="tb-icon">🛒</button>
+    </div>
+  </nav>
+  <div style="flex:1;overflow-y:auto;">
+    <div class="co-wrap">
+      <div class="co-main">
+        <div class="co-card">
+          <h3>Contact information</h3>
+          <div class="frow">
+            <div class="fg"><label>First name</label><input class="finput" value="Maria"></div>
+            <div class="fg"><label>Last name</label><input class="finput" value="García"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Email</label><input class="finput" value="maria@email.com"></div>
+            <div class="fg"><label>Phone</label><input class="finput" value="+34 600 000 000"></div>
+          </div>
+        </div>
+        <div class="co-card">
+          <h3>Payment</h3>
+          <div class="pay-icons"><span class="pico">VISA</span><span class="pico">MC</span><span class="pico">AMEX</span><span class="pico">PayPal</span></div>
+          <div class="frow"><div class="fg" style="flex:2"><label>Card number</label><input class="finput" value="4242 4242 4242 4242"></div></div>
+          <div class="frow">
+            <div class="fg"><label>Expiry</label><input class="finput" value="08/27"></div>
+            <div class="fg"><label>CVV</label><input class="finput" value="123"></div>
+            <div class="fg" style="flex:2"><label>Name on card</label><input class="finput" value="Maria García"></div>
+          </div>
+        </div>
+      </div>
+      <div class="co-sidebar">
+        <div class="sum-card">
+          <div id="co-summary"></div>
+          <button class="co-submit" onclick="completePurchase()">Complete purchase →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN 4: THANK YOU ====== -->
+<div class="screen" id="screen-thankyou">
+  <nav class="topbar">
+    <div><div class="logo">ONEBO<span>X</span></div><span class="logo-sub">Ticket Distribution System</span></div>
+    <div class="tb-right"><button class="tb-btn">🎁 Gift card</button><button class="tb-btn">❓ Help</button></div>
+  </nav>
+  <div style="flex:1;overflow-y:auto;">
+    <div class="ty-wrap">
+      <div class="ty-check">✓</div>
+      <h1 class="ty-h1">You're all set!</h1>
+      <p class="ty-sub">Your Barça Basket match pack is confirmed.<br>Tickets will be sent to your email shortly.</p>
+      <div class="ty-disc"><span>🎉</span><span id="ty-disc-txt"></span></div>
+      <div class="ty-box"><h3>🏀 Your pack includes</h3><div id="ty-matches"></div></div>
+      <div class="ty-acts">
+        <button class="ty-p">📲 Download tickets</button>
+        <button class="ty-s" onclick="resetAll()">Build another pack</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const GROUPS = [
+  {
+    label: 'Liga Endesa',
+    matches: [
+      {id:'m1', dow:'SUN', day:3,  mon:'MAY', time:'08:00 PM', match:'BARÇA – DREAMLAND GRAN CANARIA', price:100},
+      {id:'m2', dow:'SUN', day:9,  mon:'MAY', time:'08:00 PM', match:'BARÇA – SAN PABLO BURGOS',       price:100},
+      {id:'m3', dow:'SAT', day:23, mon:'MAY', time:'08:00 PM', match:'BARÇA – VALENCIA BASKET',         price:100},
+      {id:'m4', dow:'WED', day:3,  mon:'JUN', time:'08:00 PM', match:'BARÇA – 1R PARTIT QUARTS PLAYOFF',price:120},
+    ]
+  },
+  {
+    label: 'Euroleague',
+    matches: [
+      {id:'m5', dow:'WED', day:6,  mon:'MAY', time:'08:00 PM', match:'BARÇA – 3R PARTIT PLAYOFF',  price:130},
+      {id:'m6', dow:'FRI', day:8,  mon:'MAY', time:'08:00 PM', match:'BARÇA – 4T PARTIT PLAYOFF',  price:130},
+      {id:'m7', dow:'WED', day:13, mon:'MAY', time:'08:00 PM', match:'BARÇA – 5È PARTIT PLAYOFF',  price:130},
+    ]
+  }
+];
+const MAX_MATCHES = 7;
+const FEES = 2.00;
+const ZONE_DEFS = [
+  {id:'z1', name:'Zone 1', color:'#1e40af', price:100},
+  {id:'z2', name:'Zone 2', color:'#1d4ed8', price:120},
+  {id:'z3', name:'Zone 3', color:'#2563eb', price:125},
+  {id:'z4', name:'Zone 4', color:'#3b82f6', price:130},
+  {id:'z5', name:'Zone 5', color:'#60a5fa', price:135},
+  {id:'z6', name:'Zone 6', color:'#dc2626', price:140},
+  {id:'z7', name:'Zone 7', color:'#ef4444', price:145},
+  {id:'z8', name:'Zone 8', color:'#f87171', price:150},
+  {id:'z9', name:'Zone 9', color:'#6b7280', price:160},
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let selected = new Set();
+let curSeats = [];       // [{key,zoneName,zoneColor,row,col,price}]
+let activeZoneId = null;
+let mapZoomed = false;
+let activeTab = 'pricelist';
+let timerSec = 19*60+23;
+let timerIv = null;
+const occMap = {};
+
+function getOcc(key){ if(!(key in occMap)) occMap[key]=Math.random()<0.3; return occMap[key]; }
+function zoneById(id){ return ZONE_DEFS.find(z=>z.id===id); }
+function fmt(n){ return n.toFixed(2).replace('.',',')+' €'; }
+function fmtTimer(s){ const m=Math.floor(s/60),sc=s%60; return`${m}m ${sc<10?'0':''}${sc}s`; }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════
+// PACK BUILDER
+// ══════════════════════════════════════
+function buildMatches(){
+  const el = document.getElementById('match-groups');
+  el.innerHTML = '';
+  GROUPS.forEach(g => {
+    const glbl = document.createElement('div');
+    glbl.className = 'group-label';
+    glbl.textContent = g.label;
+    el.appendChild(glbl);
+    const list = document.createElement('div');
+    list.className = 'match-list';
+    g.matches.forEach(m => {
+      const isSel = selected.has(m.id);
+      const row = document.createElement('div');
+      row.className = 'mrow' + (isSel ? ' sel' : '');
+      row.innerHTML = `
+        <div class="mdate">
+          <div class="dow">${m.dow}</div>
+          <div class="day">${m.day}</div>
+          <div class="mon">${m.mon}</div>
+        </div>
+        <div class="minfo">
+          <div class="mmeta">⏰ ${m.time} &nbsp;|&nbsp; 📍 Palau Blaugrana</div>
+          <div class="mmatch">${m.match}</div>
+        </div>
+        ${isSel
+          ? `<button class="rem-btn" onclick="toggleM('${m.id}',event)">Remove</button>`
+          : `<button class="add-btn" onclick="toggleM('${m.id}',event)">Add match</button>`
+        }`;
+      list.appendChild(row);
+    });
+    el.appendChild(list);
+  });
+  updateBar();
+}
+
+function toggleM(id, e){
+  e.stopPropagation();
+  if(selected.has(id)) selected.delete(id);
+  else if(selected.size < MAX_MATCHES) selected.add(id);
+  buildMatches();
+}
+
+function updateBar(){
+  const n = selected.size;
+  const bar = document.getElementById('bot-bar');
+  const cnt = document.getElementById('bot-cnt');
+  const fill = document.getElementById('bot-fill');
+  const btn = document.getElementById('buy-btn');
+  const tag = document.getElementById('disc-tag');
+  if(!bar||!cnt||!fill||!btn||!tag) return;
+
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  cnt.textContent = `${n}/${MAX_MATCHES} Sessions added`;
+  fill.style.width = `${(n/MAX_MATCHES)*100}%`;
+  btn.disabled = n < 3;
+
+  // tiers
+  const t3 = document.getElementById('tier-3');
+  const t5 = document.getElementById('tier-5');
+  const l3 = document.getElementById('lbl-3');
+  const l5 = document.getElementById('lbl-5');
+  if(n >= 5){
+    if(t3){t3.classList.remove('dim','active-tier');}
+    if(t5){t5.classList.remove('dim');t5.classList.add('active-tier');}
+    if(l3) l3.textContent='✓ Unlocked';
+    if(l5) l5.textContent='✓ Unlocked';
+    tag.style.display='flex'; tag.textContent='✓ You\'ve unlocked 50% off';
+  } else if(n >= 3){
+    if(t3){t3.classList.remove('dim');t3.classList.add('active-tier');}
+    if(t5){t5.classList.add('dim');t5.classList.remove('active-tier');}
+    if(l3) l3.textContent='✓ Unlocked';
+    if(l5) l5.textContent='unlock';
+    tag.style.display='flex'; tag.textContent='✓ You\'ve unlocked 20% off';
+  } else {
+    if(t3){t3.classList.add('dim');t3.classList.remove('active-tier');}
+    if(t5){t5.classList.add('dim');t5.classList.remove('active-tier');}
+    if(l3) l3.textContent='starting from';
+    if(l5) l5.textContent='unlock';
+    tag.style.display='none';
+  }
+}
+
+function discountRate(){
+  const n = selected.size;
+  if(n >= 5) return 0.50;
+  if(n >= 3) return 0.20;
+  return 0;
+}
+
+// ══════════════════════════════════════
+// SEAT SELECTION
+// ══════════════════════════════════════
+function startSeats(){
+  curSeats = [];
+  activeZoneId = null;
+  mapZoomed = false;
+  activeTab = 'pricelist';
+  showScreen('screen-seats');
+  buildPriceList();
+  buildOverviewMap();
+  switchTab('pricelist');
+  renderCart();
+}
+
+// ── PRICE LIST ──
+function buildPriceList(){
+  const el = document.getElementById('price-list');
+  el.innerHTML = '';
+  ZONE_DEFS.forEach(z => {
+    const d = document.createElement('div');
+    d.className = 'pzone';
+    d.innerHTML = `
+      <div class="pzone-name" style="display:flex;align-items:center;gap:8px;">
+        <span style="width:12px;height:12px;border-radius:2px;background:${z.color};display:inline-block;flex-shrink:0;"></span>
+        ${z.name}
+      </div>
+      <div class="pzone-from">From:</div>
+      <div class="pzone-price">${z.price.toFixed(2)} €</div>`;
+    d.onclick = () => {
+      activeZoneId = z.id;
+      mapZoomed = true;
+      buildZoomedMap(z.id);
+      updateToolbar();
+      switchTab('tickets');
+    };
+    el.appendChild(d);
+  });
+}
+
+// ── OVERVIEW MAP (arena top-down) ──
+function buildOverviewMap(){
+  mapZoomed = false;
+  updateToolbar();
+  const content = document.getElementById('smap-content');
+  content.innerHTML = '';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 600 500');
+  svg.setAttribute('width','600');
+  svg.setAttribute('height','500');
+
+  // Arena zones — octagonal basketball arena top-down
+  const zones = [
+    // top sections
+    {id:'z1', d:'M200,20 L400,20 L420,80 L180,80 Z'},
+    // right side upper
+    {id:'z2', d:'M420,80 L480,60 L520,140 L450,150 Z'},
+    // right side lower
+    {id:'z3', d:'M450,150 L520,140 L510,280 L440,270 Z'},
+    // bottom right
+    {id:'z4', d:'M440,270 L510,280 L480,360 L400,340 Z'},
+    // bottom
+    {id:'z5', d:'M180,340 L400,340 L420,400 L160,400 Z'},
+    // bottom left
+    {id:'z6', d:'M120,280 L180,270 L160,400 L90,360 Z'},
+    // left side lower
+    {id:'z7', d:'M130,150 L180,160 L160,300 L90,280 Z'},
+    // left side upper
+    {id:'z8', d:'M80,60 L150,80 L130,150 L60,140 Z'},
+    // top left
+    {id:'z9', d:'M150,80 L200,20 L180,80 Z'},
+  ];
+
+  // Court area (center)
+  const court = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  court.setAttribute('x','170');court.setAttribute('y','130');
+  court.setAttribute('width','260');court.setAttribute('height','220');
+  court.setAttribute('rx','8');court.setAttribute('fill','#d4a76a');
+  court.setAttribute('stroke','#fff');court.setAttribute('stroke-width','2');
+  svg.appendChild(court);
+
+  // Center circle
+  const cc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  cc.setAttribute('cx','300');cc.setAttribute('cy','240');cc.setAttribute('r','35');
+  cc.setAttribute('stroke','#fff');cc.setAttribute('stroke-width','2');cc.setAttribute('fill','none');
+  svg.appendChild(cc);
+
+  // center line
+  const cl = document.createElementNS('http://www.w3.org/2000/svg','line');
+  cl.setAttribute('x1','170');cl.setAttribute('y1','240');cl.setAttribute('x2','430');cl.setAttribute('y2','240');
+  cl.setAttribute('stroke','#fff');cl.setAttribute('stroke-width','2');
+  svg.appendChild(cl);
+
+  // FCB text
+  const fcb = document.createElementNS('http://www.w3.org/2000/svg','text');
+  fcb.setAttribute('x','300');fcb.setAttribute('y','200');
+  fcb.setAttribute('text-anchor','middle');fcb.setAttribute('fill','rgba(0,77,153,0.5)');
+  fcb.setAttribute('font-size','32');fcb.setAttribute('font-weight','900');
+  fcb.textContent='FCB';
+  svg.appendChild(fcb);
+
+  zones.forEach(z => {
+    const zd = zoneById(z.id);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', z.d);
+    path.setAttribute('fill', zd.color);
+    path.setAttribute('opacity','0.85');
+    path.setAttribute('stroke','#fff');path.setAttribute('stroke-width','2');
+    path.style.cursor='pointer';
+    path.addEventListener('mouseenter',()=>path.setAttribute('opacity','1'));
+    path.addEventListener('mouseleave',()=>path.setAttribute('opacity','0.85'));
+    path.addEventListener('click',()=>handleZoneClick(z.id));
+
+    // centroid label
+    const nums = z.d.match(/-?\d+\.?\d*/g).map(Number);
+    const xs=[],ys=[];
+    for(let i=0;i<nums.length;i+=2){xs.push(nums[i]);ys.push(nums[i+1]);}
+    const cx=xs.reduce((a,b)=>a+b,0)/xs.length;
+    const cy=ys.reduce((a,b)=>a+b,0)/ys.length;
+    svg.appendChild(path);
+
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',cy+4);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('fill','white');
+    txt.setAttribute('font-size','10');txt.setAttribute('font-weight','700');
+    txt.setAttribute('pointer-events','none');
+    txt.textContent=zd.name;
+    svg.appendChild(txt);
+  });
+
+  content.appendChild(svg);
+}
+
+function handleZoneClick(zoneId){
+  activeZoneId = zoneId;
+  mapZoomed = true;
+  buildZoomedMap(zoneId);
+  updateToolbar();
+  // hide tabs when zoomed, show cart
+  document.getElementById('rtabs').style.display = 'none';
+  document.getElementById('panel-pricelist').style.display = 'none';
+  document.getElementById('panel-tickets').style.display = 'flex';
+  renderCart();
+}
+
+function updateToolbar(){
+  const tb = document.getElementById('smap-toolbar');
+  tb.innerHTML = '';
+  const fb = document.createElement('button');
+  fb.className='filter-btn';fb.innerHTML='⚙ Filter';
+  fb.onclick=toggleFilter;
+  tb.appendChild(fb);
+  if(mapZoomed && activeZoneId){
+    const back = document.createElement('button');
+    back.className='back-zone-btn';
+    back.innerHTML='← Back';
+    back.onclick=()=>{
+      mapZoomed=false;activeZoneId=null;
+      buildOverviewMap();
+      updateToolbar();
+      document.getElementById('rtabs').style.display='flex';
+      switchTab('pricelist');
+    };
+    tb.appendChild(back);
+    const zd = zoneById(activeZoneId);
+    const zlbl=document.createElement('span');
+    zlbl.className='zone-breadcrumb';
+    zlbl.textContent=zd?zd.name:'';
+    tb.appendChild(zlbl);
+  }
+}
+
+function toggleFilter(){}
+
+// ── ZOOMED SEAT VIEW ──
+function buildZoomedMap(zoneId){
+  const z = zoneById(zoneId);
+  const content = document.getElementById('smap-content');
+  content.innerHTML='';
+  const wrap = document.createElement('div');
+  wrap.style.cssText='background:#fff;border:1px solid #e0ddd8;border-radius:10px;padding:16px;overflow:auto;max-height:100%;';
+
+  const title=document.createElement('div');
+  title.style.cssText=`font-size:13px;font-weight:700;color:${z.color};margin-bottom:8px;text-align:center;`;
+  title.textContent=`${z.name} — from ${z.price.toFixed(2)} €`;
+  wrap.appendChild(title);
+
+  const leg=document.createElement('div');
+  leg.style.cssText='display:flex;gap:14px;font-size:10px;color:#6b7280;margin-bottom:10px;justify-content:center;';
+  leg.innerHTML=`
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:4px;vertical-align:middle;"></span>Available</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#d1d5db;margin-right:4px;vertical-align:middle;"></span>Occupied</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1a1a2e;outline:2px solid #0099cc;outline-offset:1px;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>Selected</span>`;
+  wrap.appendChild(leg);
+
+  const ROWS=8, COLS=14;
+  for(let r=ROWS;r>=1;r--){
+    const rowDiv=document.createElement('div');
+    rowDiv.className='seat-row-line';
+    const rl=document.createElement('span');
+    rl.className='seat-row-lbl';rl.textContent=r;
+    rowDiv.appendChild(rl);
+    for(let c=1;c<=COLS;c++){
+      const key=`${zoneId}-r${r}-c${c}`;
+      const occ=getOcc(key);
+      const isSel=curSeats.some(s=>s.key===key);
+      const circ=document.createElement('div');
+      circ.className='sc'+(occ?' occ':(isSel?' picked':' avail'));
+      if(!occ){
+        circ.addEventListener('click',()=>toggleSeat(key,r,c,z,zoneId));
+      }
+      rowDiv.appendChild(circ);
+    }
+    const rl2=document.createElement('span');
+    rl2.className='seat-row-lbl';rl2.textContent=r;
+    rowDiv.appendChild(rl2);
+    wrap.appendChild(rowDiv);
+  }
+  content.appendChild(wrap);
+}
+
+function switchTab(tab){
+  activeTab=tab;
+  document.getElementById('tab-pricelist').classList.toggle('active', tab==='pricelist');
+  document.getElementById('tab-tickets').classList.toggle('active', tab==='tickets');
+  document.getElementById('panel-pricelist').style.display = tab==='pricelist'?'flex':'none';
+  document.getElementById('panel-tickets').style.display = tab==='tickets'?'flex':'none';
+  if(tab==='tickets') renderCart();
+}
+
+// ── TOGGLE SEAT ──
+function toggleSeat(key, row, col, zone, zoneId){
+  const idx = curSeats.findIndex(s=>s.key===key);
+  if(idx>=0){
+    curSeats.splice(idx,1);
+  } else {
+    curSeats.push({key, zoneId, zoneName:zone.name, zoneColor:zone.color, row, col, price:zone.price});
+  }
+  buildZoomedMap(zoneId);
+  renderCart();
+}
+
+// ── CART ──
+function renderCart(){
+  const panel = document.getElementById('cart-panel');
+  const n = curSeats.length;
+
+  if(n===0){
+    panel.innerHTML=`<div class="cart-empty"><div class="ce-icon">ℹ</div><div class="ce-title">Choose how many seats you need</div><div class="ce-sub">This will define the number of tickets across every session in your pack</div></div>`;
+    document.getElementById('packs-cnt').textContent='0';
+    document.getElementById('tot-price').textContent='00,00 €';
+    document.getElementById('cont-btn').disabled=true;
+    return;
+  }
+
+  if(!timerIv) startTimer();
+
+  let html=`<div class="cart-timer">⏱ The cart expires in <span id="timer-disp">${fmtTimer(timerSec)}</span></div>`;
+  let subtotal=0;
+  curSeats.forEach(s=>{
+    subtotal+=s.price;
+    html+=`<div class="citem">
+      <div class="citem-zone" style="border-left:3px solid ${s.zoneColor};padding-left:6px;">${s.zoneName}</div>
+      <div class="citem-seat">Row ${s.row} · Seat ${s.col} · Rate</div>
+      <div class="citem-acts"><button class="ca" onclick="removeSeat('${s.key}','${s.zoneId}')">🗑</button></div>
+      <div class="citem-price">${s.price.toFixed(2)} €</div>
+    </div>`;
+  });
+  html+=`<div class="cart-fees"><span>Fees</span><span>${FEES.toFixed(2)} €</span></div>`;
+  panel.innerHTML=html;
+
+  const total = subtotal + FEES;
+  document.getElementById('packs-cnt').textContent=n;
+  document.getElementById('tot-price').textContent=fmt(total);
+  document.getElementById('cont-btn').disabled=n<1;
+
+  const td=document.getElementById('timer-disp');
+  if(td) td.textContent=fmtTimer(timerSec);
+}
+
+function removeSeat(key, zoneId){
+  const idx=curSeats.findIndex(s=>s.key===key);
+  if(idx>=0) curSeats.splice(idx,1);
+  buildZoomedMap(zoneId);
+  renderCart();
+}
+
+function startTimer(){
+  timerIv=setInterval(()=>{
+    timerSec--;if(timerSec<0)timerSec=0;
+    const td=document.getElementById('timer-disp');
+    if(td) td.textContent=fmtTimer(timerSec);
+  },1000);
+}
+
+function zoomIn(){
+  if(!mapZoomed && ZONE_DEFS[0]){
+    handleZoneClick(ZONE_DEFS[0].id);
+  }
+}
+function zoomOut(){
+  if(mapZoomed){
+    mapZoomed=false;activeZoneId=null;
+    buildOverviewMap();
+    updateToolbar();
+    document.getElementById('rtabs').style.display='flex';
+    switchTab('pricelist');
+  }
+}
+
+// ══════════════════════════════════════
+// CHECKOUT
+// ══════════════════════════════════════
+function goCheckout(){
+  buildCheckout();
+  showScreen('screen-checkout');
+  if(timerIv){clearInterval(timerIv);timerIv=null;}
+}
+
+function buildCheckout(){
+  const n = selected.size;
+  const disc = discountRate();
+  const discPct = disc===0.5?'50%':disc===0.2?'20%':'';
+  const el = document.getElementById('co-summary');
+
+  // base seat price * number of matches
+  const seatSubtotal = curSeats.reduce((a,s)=>a+s.price,0);
+  const matchSubtotal = seatSubtotal * n; // same seats applied to all matches
+  const discAmt = matchSubtotal * disc;
+  const feeTotal = FEES * curSeats.length;
+  const total = matchSubtotal - discAmt + feeTotal;
+
+  let html=`<h3>Order summary</h3>`;
+
+  // show seat selection
+  html+=`<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px;">Seat selection (all matches)</div>`;
+  curSeats.forEach(s=>{
+    html+=`<div class="smatch">
+      <div class="smatch-name" style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:${s.zoneColor};display:inline-block;flex-shrink:0;"></span>${s.zoneName} · Row ${s.row} · Seat ${s.col}</div>
+      <div class="smatch-price">${s.price.toFixed(2)} € × ${n} matches</div>
+    </div>`;
+  });
+
+  html+=`<div style="font-size:12px;font-weight:600;color:var(--muted);margin:10px 0 8px;text-transform:uppercase;letter-spacing:.3px;">Matches included</div>`;
+  Array.from(selected).forEach(id=>{
+    const m = GROUPS.flatMap(g=>g.matches).find(x=>x.id===id);
+    html+=`<div class="smatch"><div class="smatch-name">${m.match}</div><div class="smatch-date">${m.dow} ${m.day} ${m.mon} · ${m.time}</div></div>`;
+  });
+
+  html+=`<hr class="sdiv">
+    <div class="sline"><span>Subtotal (${n} matches)</span><span class="sp">${matchSubtotal.toFixed(2)} €</span></div>
+    <div class="sdisc"><span>✓ Pack discount (${discPct})</span><span>−${discAmt.toFixed(2)} €</span></div>
+    <div class="sline"><span>Management fees</span><span class="sp">${feeTotal.toFixed(2)} €</span></div>
+    <hr class="sdiv">
+    <div class="stot"><span>Total</span><span>${total.toFixed(2)} €</span></div>`;
+  el.innerHTML=html;
+}
+
+function completePurchase(){
+  buildThankYou();
+  showScreen('screen-thankyou');
+}
+
+// ══════════════════════════════════════
+// THANK YOU
+// ══════════════════════════════════════
+function buildThankYou(){
+  const n = selected.size;
+  const disc = discountRate();
+  const discPct = disc===0.5?'50%':disc===0.2?'20%':'';
+  document.getElementById('ty-disc-txt').textContent=`You saved ${discPct} on your pack — great choice!`;
+  const el=document.getElementById('ty-matches');
+  let html='';
+  Array.from(selected).forEach(id=>{
+    const m=GROUPS.flatMap(g=>g.matches).find(x=>x.id===id);
+    html+=`<div class="ty-match">
+      <div class="ty-mi">🏀</div>
+      <div class="ty-minfo">
+        <div class="ty-ma">${m.match}</div>
+        <div class="ty-md">${m.dow} ${m.day} ${m.mon} · ${m.time}</div>
+      </div>
+      <div class="ty-mseat">✓ Confirmed</div>
+    </div>`;
+  });
+  if(curSeats.length>0){
+    html+=`<div class="ty-match" style="background:#f9f9f9;border-radius:6px;padding:8px;margin-top:4px;">
+      <div class="ty-mi">🪑</div>
+      <div class="ty-minfo">
+        <div class="ty-ma">${curSeats.length} seat(s) · ${curSeats[0].zoneName}</div>
+        <div class="ty-md">Applied to all ${n} matches</div>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ══════════════════════════════════════
+// RESET
+// ══════════════════════════════════════
+function resetAll(){
+  selected.clear();curSeats=[];activeZoneId=null;mapZoomed=false;
+  timerSec=19*60+23;
+  if(timerIv){clearInterval(timerIv);timerIv=null;}
+  buildMatches();
+  showScreen('screen-builder');
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+buildMatches();
+</script>
+</body>
+</html>
