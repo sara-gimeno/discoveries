@@ -3,46 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mar d'Estiu 2026 — Packs a la carta · Discovery</title>
+<title>Custom Packs — Discovery</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#0f1340;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
-
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#0f1340;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
 .hero-bg{position:fixed;inset:0;background:linear-gradient(160deg,#3a5bd9 0%,#0f1340 60%);z-index:0;}
 .waves{position:fixed;inset:0;opacity:.06;background-image:repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(255,255,255,.5) 30px,rgba(255,255,255,.5) 31px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.3) 60px,rgba(255,255,255,.3) 61px);z-index:0;}
-
-.wrap{position:relative;z-index:1;text-align:center;max-width:520px;width:100%;}
-
-.logo{color:#fff;font-size:15px;font-weight:800;letter-spacing:-.5px;margin-bottom:32px;opacity:.6;}
+.wrap{position:relative;z-index:1;text-align:center;max-width:780px;width:100%;}
+.logo{color:#fff;font-size:15px;font-weight:800;letter-spacing:-.5px;margin-bottom:28px;opacity:.6;}
 .logo span{color:#e85c45;}
+.main-title{color:#fff;font-size:44px;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:6px;}
+.main-tag{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;margin-bottom:36px;letter-spacing:.5px;text-transform:uppercase;}
 
-.festival-title{color:#fff;font-size:52px;font-weight:900;letter-spacing:-1.5px;line-height:1;font-style:italic;margin-bottom:4px;}
-.festival-sub{color:rgba(255,255,255,.5);font-size:16px;font-weight:400;margin-bottom:6px;}
-.festival-tag{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:36px;letter-spacing:.5px;text-transform:uppercase;}
+/* sections */
+.section{margin-bottom:32px;text-align:left;}
+.section-label{color:rgba(255,255,255,.35);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;padding-left:2px;}
+.section-title{color:rgba(255,255,255,.75);font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-title span{font-style:italic;}
 
-.label{color:rgba(255,255,255,.4);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
-
-.cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
-
+.cards{display:flex;gap:12px;flex-wrap:wrap;}
 .card{
   background:rgba(255,255,255,.07);
   border:1px solid rgba(255,255,255,.12);
   border-radius:14px;
-  padding:24px 20px;
-  width:220px;
+  padding:22px 18px;
+  flex:1;min-width:180px;
   text-decoration:none;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
   transition:background .2s,border-color .2s,transform .15s;
-  cursor:pointer;
 }
 .card:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.25);transform:translateY(-2px);}
+.card.card-wide{flex:2;min-width:240px;}
+.card-icon{font-size:32px;line-height:1;}
+.card-title{color:#fff;font-size:14px;font-weight:700;}
+.card-desc{color:rgba(255,255,255,.4);font-size:12px;line-height:1.4;text-align:center;}
+.card-btn{margin-top:4px;color:#fff;border:none;padding:8px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;width:100%;}
+.card-btn.coral{background:#e85c45;}
+.card-btn.blue{background:#0099cc;}
 
-.card-icon{font-size:36px;line-height:1;}
-.card-title{color:#fff;font-size:15px;font-weight:700;}
-.card-desc{color:rgba(255,255,255,.45);font-size:12px;line-height:1.4;text-align:center;}
-.card-btn{margin-top:4px;background:#e85c45;color:#fff;border:none;padding:8px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;width:100%;}
-
-.footer{margin-top:40px;color:rgba(255,255,255,.25);font-size:11px;}
+.divider-section{border:none;border-top:1px solid rgba(255,255,255,.08);margin:8px 0 28px;}
+.footer{margin-top:8px;color:rgba(255,255,255,.2);font-size:11px;}
 </style>
 </head>
 <body>
@@ -51,29 +51,46 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#0f1340;
 
 <div class="wrap">
   <div class="logo">ONEBO<span>X</span></div>
+  <div class="main-title">Custom Packs</div>
+  <div class="main-tag">Discovery prototypes</div>
 
-  <div class="festival-title">mar d'estiu</div>
-  <div class="festival-sub">2026 · Santa Susanna</div>
-  <div class="festival-tag">Packs a la carta · Discovery prototype</div>
-
-  <div class="label">Select a prototype</div>
-
-  <div class="cards">
-    <a class="card" href="desktop.html">
-      <div class="card-icon">🖥</div>
-      <div class="card-title">Desktop</div>
-      <div class="card-desc">Full pack builder flow optimised for web browser</div>
-      <button class="card-btn">Open →</button>
-    </a>
-    <a class="card" href="mobile.html">
-      <div class="card-icon">📱</div>
-      <div class="card-title">Mobile</div>
-      <div class="card-desc">Responsive flow for smartphone — best on mobile</div>
-      <button class="card-btn">Open →</button>
-    </a>
+  <!-- Mar d'Estiu -->
+  <div class="section">
+    <div class="section-label">Use case 01 — Festival</div>
+    <div class="section-title">🎵 <span>Mar d'Estiu 2026</span> · Santa Susanna</div>
+    <div class="cards">
+      <a class="card" href="desktop.html">
+        <div class="card-icon">🖥</div>
+        <div class="card-title">Desktop</div>
+        <div class="card-desc">Full pack builder flow optimised for web browser</div>
+        <button class="card-btn coral">Open →</button>
+      </a>
+      <a class="card" href="mobile.html">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Mobile</div>
+        <div class="card-desc">Responsive flow for smartphone — best on mobile</div>
+        <button class="card-btn coral">Open →</button>
+      </a>
+    </div>
   </div>
 
-  <div class="footer">Mar d'Estiu 2026 · Fever / ONEBOX · Discovery entregable</div>
+  <hr class="divider-section">
+
+  <!-- Basket -->
+  <div class="section">
+    <div class="section-label">Use case 02 — Sport</div>
+    <div class="section-title">🏀 <span>Match Pack</span> · Palau Blaugrana</div>
+    <div class="cards">
+      <a class="card card-wide" href="barca_basket_pack_prototype_v1.html">
+        <div class="card-icon">🖥</div>
+        <div class="card-title">Desktop</div>
+        <div class="card-desc">Custom match pack — single seat selection applied to all sessions</div>
+        <button class="card-btn blue">Open →</button>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">Fever / ONEBOX · Packs a la carta · Discovery entregable</div>
 </div>
 </body>
 </html>
